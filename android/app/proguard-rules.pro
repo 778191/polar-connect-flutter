@@ -1,0 +1,2 @@
+-keep class org.joda.convert.** { *; }
+-dontwarn org.joda.convert.**
