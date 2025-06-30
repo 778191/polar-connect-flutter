@@ -230,3 +230,34 @@ List<int> findRPeaks(List<double> signal) {
 
   return peaks;
 }
+
+List<int> obtenerPeaksECGReales(
+  List<int> panTompkinsPeaks,              // índices de picos detectados
+  List<int> ecgTimestamps,                 // timestamps en ms
+  List<int> ecgValues,                     // señal ECG original
+  int ventanaMs,
+) {
+  List<int> peaksECG = [];
+
+  for (int peakIdx in panTompkinsPeaks) {
+    if (peakIdx >= ecgTimestamps.length) continue;
+
+    int centerTime = ecgTimestamps[peakIdx];
+
+    // Buscar los índices dentro de la ventana de ±ventanaMs
+    int maxVal = -999999;
+    int maxIdx = peakIdx;
+
+    for (int i = 0; i < ecgTimestamps.length; i++) {
+      int delta = (ecgTimestamps[i] - centerTime).abs();
+      if (delta <= ventanaMs && ecgValues[i] > maxVal) {
+        maxVal = ecgValues[i];
+        maxIdx = i;
+      }
+    }
+
+    peaksECG.add(maxIdx);
+  }
+
+  return peaksECG;
+}

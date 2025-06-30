@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:async';
 
 import 'package:polar_connect/widgets/custom_buttons.dart';
 import 'package:polar_connect/widgets/custom_colors.dart';
@@ -38,6 +39,7 @@ class PolarConnectState extends State<PolarConnect> {
   List<String> _deviceIds = []; // List of device identifiers.
   List<String> _deviceNames = []; // List of device names.
   List<deviceType> _deviceTypes = []; // List of device types.
+  Timer? _autoSaveTimer;
 
   // Plot arrays
   List<SensorValue> _plotPPGValues = List<SensorValue>.filled(
@@ -104,7 +106,11 @@ class PolarConnectState extends State<PolarConnect> {
     super.initState();
     _requestBluetoothPermission();
     _addListeners();
+    _autoSaveTimer = Timer.periodic(Duration(minutes: 15), (Timer t) {
+    _saveRecord();
+  });
   }
+
 
   @override
   void dispose() {
@@ -115,6 +121,7 @@ class PolarConnectState extends State<PolarConnect> {
     _deviceNames.clear();
     _clearDeviceValues();
     _removeListeners();
+    _autoSaveTimer?.cancel();
     super.dispose();
   }
 
@@ -566,6 +573,15 @@ class PolarConnectState extends State<PolarConnect> {
           _squaredECGValues = square(_derivativeECGValues);
           _averagedECGValues = movingAverage(_squaredECGValues);
           _rpeaks = findRPeaks(_averagedECGValues);
+
+          List<int> peaksECG = obtenerPeaksECGReales(
+            _rpeaks,
+            _recordECGTimestamps,
+            _recordECGValues,
+            100, // ventana de ±100ms
+          );
+
+
           for (var i = 0; i < _filteredECGValues.length; i++) {
             _plotFilteredECGValues = _plotFilteredECGValues.sublist(1)
               ..add(SensorValue(_timestamps[i], _filteredECGValues[i]));
@@ -845,6 +861,9 @@ class PolarConnectState extends State<PolarConnect> {
         await fileACC.writeAsString(csvACC);
 
         CustomToast.showToast("Saved locally");
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Recording saved!'))
+);
       }
     } catch (e) {
       // Error saving local file
