@@ -15,6 +15,10 @@ import 'package:polar/polar.dart';
 import 'package:sprintf/sprintf.dart';
 import '../widgets/chart.dart';
 import '../processing/pan_tompkins.dart';
+import '../processing/hrvm_rmssd.dart';
+import '../processing/hrvm_sd1_sd2.dart';
+import '../processing/hrvm_dfa.dart';
+
 
 class PolarConnect extends StatefulWidget {
   @override
@@ -601,6 +605,16 @@ class PolarConnectState extends State<PolarConnect> {
               rrIntervals.reduce((a, b) => a + b) / rrIntervals.length;
           double rrMeanSeconds = rrMean / 130;
           _hrFromECG = (60 / rrMeanSeconds).round();
+          double rmssd = calcularRMSSD(rrIntervals);
+          double sd1 = calcularSD1(rrIntervals);
+          double sd2 = calcularSD1(rrIntervals);
+          double dfa = calcularDFA(rrIntervals);
+
+          print("RMSSD: $rmssd ms");
+          print("SD1: $sd1 ms");
+          print("SD2: $sd2 ms");
+          print("DFA α: $dfa");
+
         });
       });
     }
