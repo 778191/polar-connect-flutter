@@ -582,7 +582,7 @@ class PolarConnectState extends State<PolarConnect> {
             _rpeaks,
             _recordECGTimestamps,
             _recordECGValues,
-            100, // ventana de ±100ms
+            400, // ventana de ±100ms
           );
 
 
